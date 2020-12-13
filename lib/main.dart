@@ -76,6 +76,7 @@ class _CustomWidgetState extends State<CustomWidget> {
               appBar: CustomInheritedWidget.of(context).screenMode.value ==
                       ScreenMode.edit
                   ? AppBar(
+                      backgroundColor: Colors.grey[500],
                       leading: IconButton(
                         icon: Icon(Icons.close),
                         onPressed: () {
