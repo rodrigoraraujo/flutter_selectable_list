@@ -40,6 +40,11 @@ class CustomInheritedWidget extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<CustomInheritedWidget>();
   }
 
+  static void reset(BuildContext context) {
+    CustomInheritedWidget.of(context).selectedItems.clear();
+    CustomInheritedWidget.of(context).screenMode.value = ScreenMode.browse;
+  }
+
   @override
   bool updateShouldNotify(CustomInheritedWidget oldWidget) =>
       oldWidget.selectedItems.length != selectedItems.length;
@@ -80,11 +85,7 @@ class _CustomWidgetState extends State<CustomWidget> {
                       leading: IconButton(
                         icon: Icon(Icons.close),
                         onPressed: () {
-                          CustomInheritedWidget.of(context)
-                              .selectedItems
-                              .clear();
-                          CustomInheritedWidget.of(context).screenMode.value =
-                              ScreenMode.browse;
+                          CustomInheritedWidget.reset(context);
                         },
                       ),
                       title: Text(
@@ -203,8 +204,13 @@ class _CustomLIstItemState extends State<CustomLIstItem> {
                   CustomInheritedWidget.of(context).selectedItems.add(model);
                 } else {
                   CustomInheritedWidget.of(context).selectedItems.removeWhere(
-                        (element) => element.title == widget.title,
+                        (element) => element.title == model.title,
                       );
+                }
+
+                if (CustomInheritedWidget.of(context).selectedItems.length ==
+                    0) {
+                  CustomInheritedWidget.reset(context);
                 }
 
                 CustomInheritedWidget.of(context).itemsLength.value =
