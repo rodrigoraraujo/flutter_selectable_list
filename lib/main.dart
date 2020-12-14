@@ -12,8 +12,19 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData.light().copyWith(
         //primarySwatch: Colors.white.,
+        primaryColor: Colors.orange,
         disabledColor: Colors.grey[900],
         textTheme: ThemeData.light().textTheme.copyWith(
+              subtitle1: TextStyle(
+                color: Colors.orange[700],
+                fontSize: 20.0,
+              ),
+              bodyText1: TextStyle(
+                fontSize: 20.0,
+              ),
+              bodyText2: TextStyle(
+                fontSize: 16.0,
+              ),
               headline6: TextStyle(
                 color: Colors.grey[900],
                 fontSize: 22.0,
