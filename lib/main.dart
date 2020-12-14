@@ -11,8 +11,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.light().copyWith(
-          //primarySwatch: Colors.white.,
-          ),
+        //primarySwatch: Colors.white.,
+        disabledColor: Colors.grey[900],
+        textTheme: ThemeData.light().textTheme.copyWith(
+              headline6: TextStyle(
+                color: Colors.grey[900],
+                fontSize: 22.0,
+              ),
+            ),
+      ),
       home: CustomInheritedWidget(
         child: CustomWidget(),
       ),
@@ -57,21 +64,23 @@ class CustomWidget extends StatefulWidget {
 
 class _CustomWidgetState extends State<CustomWidget> {
   static final data = List.generate(
-    5,
+    30,
     (index) => Model(
       title: 'Item ${index + 1}',
       selected: false,
     ),
   );
 
-  bool allItemsSelected;
+  bool _allItemsSelected;
 
   @override
   Widget build(BuildContext context) {
+    Key listViewKey = UniqueKey();
+
     return ValueListenableBuilder(
         valueListenable: CustomInheritedWidget.of(context).itemsLength,
         builder: (context, _, __) {
-          allItemsSelected =
+          _allItemsSelected =
               CustomInheritedWidget.of(context).selectedItems.length ==
                   data.length;
 
@@ -83,8 +92,9 @@ class _CustomWidgetState extends State<CustomWidget> {
                   ? AppBar(
                       backgroundColor: Colors.grey[500],
                       leading: IconButton(
-                        icon: Icon(Icons.close),
+                        icon: Icon(Icons.arrow_back),
                         onPressed: () {
+                          listViewKey = UniqueKey();
                           CustomInheritedWidget.reset(context);
                         },
                       ),
@@ -93,27 +103,34 @@ class _CustomWidgetState extends State<CustomWidget> {
                       ),
                       actions: [
                         IconButton(
-                          icon: Icon(allItemsSelected
-                              ? Icons.check_box_outline_blank
-                              : Icons.check),
+                          icon: Icon(
+                              _allItemsSelected ? Icons.clear : Icons.check),
                           onPressed: () {
-                            setState(() {
+                            listViewKey = UniqueKey();
+
+                            CustomInheritedWidget.of(context)
+                                .selectedItems
+                                .clear();
+                            CustomInheritedWidget.of(context)
+                                .itemsLength
+                                .value = 0;
+
+                            if (!_allItemsSelected) {
                               CustomInheritedWidget.of(context)
-                                  .selectedItems
-                                  .clear();
-                              if (!allItemsSelected) {
-                                for (final model in data) {
-                                  CustomInheritedWidget.of(context)
-                                      .selectedItems
-                                      .add(
-                                        Model(
-                                          title: model.title,
-                                          selected: true,
-                                        ),
-                                      );
-                                }
+                                  .itemsLength
+                                  .value = data.length;
+
+                              for (final model in data) {
+                                CustomInheritedWidget.of(context)
+                                    .selectedItems
+                                    .add(
+                                      Model(
+                                        title: model.title,
+                                        selected: true,
+                                      ),
+                                    );
                               }
-                            });
+                            }
                           },
                         ),
                         Visibility(
@@ -132,16 +149,16 @@ class _CustomWidgetState extends State<CustomWidget> {
                       title: Text('List'),
                     ),
               body: SafeArea(
+                key: listViewKey,
                 child: ListView.builder(
-                  key: UniqueKey(),
                   itemCount: data.length,
-                  itemBuilder: (_, index) => CustomLIstItem(
+                  itemBuilder: (context, index) => CustomLIstItem(
                     title: data[index].title,
                     selected: CustomInheritedWidget.of(context)
                         .selectedItems
                         .firstWhere(
                           (element) => element.title == data[index].title,
-                          orElse: () => Model(title: '', selected: false),
+                          orElse: () => Model(selected: false),
                         )
                         .selected,
                   ),
@@ -181,11 +198,18 @@ class _CustomLIstItemState extends State<CustomLIstItem> {
         leading:
             _selected ? Icon(CupertinoIcons.check_mark_circled_solid) : null,
         selected: _selected,
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          //style: Theme.of(context).textTheme.headline6,
+        ),
         onLongPress: CustomInheritedWidget.of(context).screenMode.value ==
                 ScreenMode.edit
             ? () {}
             : () {
+                setState(() {
+                  _selected = !_selected;
+                });
+
                 CustomInheritedWidget.of(context).screenMode.value =
                     ScreenMode.edit;
                 final model = Model(title: widget.title, selected: true);
